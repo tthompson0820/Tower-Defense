@@ -11,7 +11,10 @@ y = 250
 # Coordinates for drawn circle.
 radius = 15
 #radius of drawn circle
-vel = 10
+vel_x = 10
+vel_y = 10
+jump = False 
+
 run =True
 #Loop that runs the game and updates display
 while run:
@@ -24,16 +27,23 @@ while run:
         if event.type == pygame.QUIT:
             run = False
     userInput = pygame.key.get_pressed()
+    #Movement
+    if userInput[pygame.K_LEFT] and x > 0:
+        x -= vel_x
+    if userInput [pygame.K_RIGHT]and x < 500: 
+        x += vel_x
 
-    if userInput[pygame.K_LEFT]:
-        x -= vel
-    if userInput [pygame.K_RIGHT]:
-        x += vel
-    if userInput [pygame.K_UP]:
-        y-= vel
-    if userInput [pygame.K_DOWN]:
-        y += vel
+    if jump is False and userInput[pygame.K_SPACE]:
+        jump = True
+
+    if jump is True:
+        y -= vel_y*4
+        vel_y -= 1
+        if vel_y < -10:
+            jump = False
+            vel_y = 10
 
     pygame.time.delay(10)
     pygame.display.update()
+
 
