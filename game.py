@@ -1,7 +1,7 @@
 from operator import truediv
 import pygame
 import os
-
+print("Goblin Defense By Thomas Thompson")
 pygame.init()
 
 win_width = 500
@@ -9,7 +9,7 @@ win_height = 500
 
 win = pygame.display.set_mode((win_width,win_height))
 bg_image = pygame.image.load("bg.png")
-pygame.display.set_caption("Tower Defense")
+pygame.display.set_caption("Goblin Defense")
 bg = pygame.transform.scale(bg_image, (500,500))
 
 
@@ -17,6 +17,8 @@ bg = pygame.transform.scale(bg_image, (500,500))
 stationary = pygame.image.load(os.path.join("Hero","standing.png"))
 tower= pygame.image.load(os.path.join("Tower","Tower.png"))
 bulletImg = pygame.transform.scale(pygame.image.load(os.path.join("Bullet","bullet.png")),(10,10))
+pygame_icon = pygame.image.load('Hero/standing.png')
+pygame.display.set_icon(pygame_icon)
 
 left = [pygame.image.load(os.path.join("Hero","L1.png")),
 pygame.image.load(os.path.join("Hero","L2.png")),
@@ -37,7 +39,7 @@ pygame.image.load(os.path.join("Hero","R5.png")),
 pygame.image.load(os.path.join("Hero","R6.png")),
 pygame.image.load(os.path.join("Hero","R7.png")),
 pygame.image.load(os.path.join("Hero","R8.png")),
-pygame.image.load(os.path.join("Hero","R9.png")),]    
+pygame.image.load(os.path.join("Hero","R9.png")),]
 
 #enemy animations
 left_enemy = [pygame.image.load(os.path.join("Enemy", "L1E.png")),
@@ -69,13 +71,13 @@ right_enemy = [pygame.image.load(os.path.join("Enemy", "R1E.png")),
 #Tower Class
 class Tower:
     def __init__(self,x,y):
-        self.x = x 
-        self.y = y 
+        self.x = x
+        self.y = y
         #Tower Health
         self.hitbox = (self.x, self.y, 64, 64)
         self.health = 200
         self.lives = 1
-        self.alive = True 
+        self.alive = True
         self.stationary = True
     def draw(self, win):
         self.hitbox = (self.x + 15, self.y + 15,  30, 40)
@@ -83,7 +85,7 @@ class Tower:
             win.blit(tower, (self.x, self.y))
         if self.health >= 0:
             pygame.draw.rect(win, (0, 255, 0), (140,0, self.health, 10))
-            
+
 #Player Class
 class Player:
     def __init__(self,x,y):
@@ -96,7 +98,7 @@ class Player:
         self.face_right = True
         self.face_left = False
         self.stepIndex = 0
-        #Jump 
+        #Jump
         self.jump = False
         #Bullets
         self.bullets = []
@@ -105,7 +107,9 @@ class Player:
         self.hitbox = (self.x, self.y, 64, 64)
         self.health = 30
         self.lives = 1
-        self.alive = True 
+        self.alive = True
+        self.score = 0
+
 
 
 
@@ -114,13 +118,13 @@ class Player:
         if userInput[pygame.K_RIGHT]:
             self.x += self.velx
             self.face_right = True
-            self.face_left = False 
+            self.face_left = False
         elif userInput[pygame.K_LEFT]:
             self.x -= self.velx
             self.face_right = False
-            self.face_left = True 
+            self.face_left = True
         else:
-             self.stepIndex = 0    
+             self.stepIndex = 0
 
 
     def draw(self, win):
@@ -138,8 +142,8 @@ class Player:
             self.stepIndex += 1
         else:
             win.blit(stationary,(self.x,self.y))
-    
-    
+
+
     def playerJump (self, userInput):
         if userInput[pygame.K_SPACE] and self.jump is False:
             self.jump = True
@@ -147,24 +151,41 @@ class Player:
             self.y -= self.vely*4
             self.vely -=1
         if self.vely < -6:
-            self.jump = False 
+            self.jump = False
             self.vely = 6
-    
+
     def direction(self):
         if self.face_right:
             return 1
         if self.face_left:
             return -1
     def cooldown(self):
-        if self.cool_down_count >= 20:
-            self.cool_down_count = 0
-        elif self.cool_down_count > 0:
-            self.cool_down_count += 1
+        if player.score >= 0:
+            if self.cool_down_count >= 10:
+                self.cool_down_count = 0
+            elif self.cool_down_count > 0:
+                self.cool_down_count += 1
+        if player.score >= 200:
+                if self.cool_down_count >= 8:
+                    self.cool_down_count = 0
+                elif self.cool_down_count > 0:
+                    self.cool_down_count += 1
+        if player.score >= 300:
+                if self.cool_down_count >= 5:
+                    self.cool_down_count = 0
+                elif self.cool_down_count > 0:
+                    self.cool_down_count += 1
+        if player.score >= 500:
+            if self.cool_down_count >= 3:
+                self.cool_down_count = 0
+            elif self.cool_down_count > 0:
+                self.cool_down_count += 1
+
 
     def shoot(self):
         self.hit()
         self.cooldown()
-        if (userInput[pygame.K_z] and self.cool_down_count == 0):
+        if (userInput[pygame.K_z])and self.cool_down_count == 0:
             bullet = Bullet(self.x, self.y, self.direction())
             self.bullets.append(bullet)
             self.cool_down_count = 1
@@ -172,8 +193,8 @@ class Player:
             bullet.move()
             if bullet.off_screen():
                 self.bullets.remove(bullet)
-    
-    
+
+
     def hit(self):
         for enemy in enemies:
             for bullet in self.bullets:
@@ -183,7 +204,7 @@ class Player:
                     player.bullets.remove(bullet)
 
 
-#Bullet Class 
+#Bullet Class
 class Bullet:
     def __init__(self, x, y, direction):
         self.x = x + 15
@@ -201,7 +222,7 @@ class Bullet:
 
     def off_screen(self):
         return not (self.x >=0 and self.x <= win_width)
-#Enemy Class 
+#Enemy Class
 class Enemy:
     def __init__(self, x, y, speed):
         self.x = x
@@ -223,12 +244,12 @@ class Enemy:
             pygame.draw.rect(win, (0, 255, 0), (self.x + 15, self.y, self.health, 10))
         self.step()
         win.blit(left_enemy[self.stepIndex // 10], (self.x, self.y))
-        self.stepIndex += 1       
-   
-   
+        self.stepIndex += 1
+
+
     def move(self):
         self.hit()
-        self.x -= speed    
+        self.x -= speed
     def hit(self):
         if player.hitbox[0] < enemy.x + 32 < player.hitbox[0] + player.hitbox[2] and player.hitbox[1] < enemy.y + 32 < \
             player.hitbox[1] + player.hitbox[3]:
@@ -239,11 +260,27 @@ class Enemy:
                     player.health = 30
                 elif player.health == 0 and player.lives == 0:
                     player.alive = False
+        if towerGame.hitbox[0] < enemy.x + 32 < towerGame.hitbox[0] + towerGame.hitbox[2] and towerGame.hitbox[1] < enemy.y + 32 < \
+            towerGame.hitbox[1] + towerGame.hitbox[3]:
+            if towerGame.health > 0:
+                towerGame.health -= 1
+                if towerGame.health == 0 and towerGame.lives > 0:
+                    towerGame.lives -= 1
+                    towerGame.health = 200
+                elif towerGame.health == 0 and towerGame.lives == 0:
+                    towerGame.alive = False
+
+    def die (self):
+        if enemy.health == 0:
+            player.score += 50
+
+
+
     def off_screen(self):
-        return not (self.x >= -50 and self.x <= win_width +50) 
+        return not (self.x >= -50 and self.x <= win_width +50)
 
 
-    
+
 #Game function
 def draw_game():
     win.fill((0, 0, 0))
@@ -261,12 +298,17 @@ def draw_game():
     if player.alive == False:
         textRect = text.get_rect()
         textRect.center = (win_width // 2, win_height //2)
-    
+
     font = pygame.font.Font('freesansbold.ttf', 15)
     text1 = font.render('Tower Health: ' + str(towerGame.health), True,(255,255,255))
     win.blit(text1, [0,0])
-    
-    
+    text2 = font.render('Score: ' + str(player.score), True, (255,255,255))
+    win.blit(text2, [400, 0])
+    text3 = font.render('Kills: ' + str(kills), True, (255,255,255))
+    win.blit(text3, [400, 20])
+
+
+
     pygame.time.delay(30)
     pygame.display.update()
 
@@ -274,9 +316,9 @@ def draw_game():
 player = Player(60, 415)
 towerGame = Tower(15, 370)
 
-#Enemies 
+#Enemies
 enemies = []
-speed = 3
+speed = 1
 kills = 0
 
 run = True
@@ -287,35 +329,37 @@ while run:
     for event in pygame.event.get():...
     #input
     userInput = pygame.key.get_pressed()
-    
-    
+
+
     if event.type == pygame.QUIT:
-        run = False 
+        run = False
     #shoot
     player.shoot()
     #movement
     player.move_player(userInput)
     player.playerJump(userInput)
-    
-    
-    #enemies 
+
+
+    #enemies
     if len(enemies) == 0:
-        enemy = Enemy(450,400, speed)
+        enemy = Enemy(450,415, speed)
         enemies.append(enemy)
         if speed <= 10:
-            speed += 1
+            speed += 0.5
     for enemy in enemies:
         enemy.move()
         if enemy.off_screen() or enemy.health == 0:
             enemies.remove(enemy)
+            enemy.die()
         if enemy.x < 50:
             enemies.remove(enemy)
         if enemy.health == 0:
             kills +=1
-
+    if player.health == 0:
+        pygame.quit()
 
     draw_game()
-    
-    
+print("Player Score: " + str(player.score))
+
 
 
